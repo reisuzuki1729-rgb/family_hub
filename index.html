@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ファミリー Hub - 家族みんなのオールインワンアプリ</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased pb-12">
+
+  <!-- Header Section -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-rose-200">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-800 leading-none">Family Hub</h1>
+          <span class="text-xs text-slate-500 font-medium">ママ・れい・ゆみ・なみ</span>
+        </div>
+      </div>
+
+      <!-- Current Active User Switcher -->
+      <div class="flex items-center space-x-2">
+        <span class="text-xs text-slate-400 hidden md:inline">操作中:</span>
+        <div class="flex items-center space-x-1 sm:space-x-2 bg-slate-100 p-1 rounded-full border border-slate-200">
+          <button onclick="setCurrentUser('mom')" id="user-btn-mom" class="user-switch-btn px-2.5 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 bg-white shadow-xs text-slate-800">
+            <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+            <span>ママ</span>
+          </button>
+          <button onclick="setCurrentUser('rei')" id="user-btn-rei" class="user-switch-btn px-2.5 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 text-slate-600 hover:text-slate-900">
+            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+            <span>れい</span>
+          </button>
+          <button onclick="setCurrentUser('yumi')" id="user-btn-yumi" class="user-switch-btn px-2.5 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 text-slate-600 hover:text-slate-900">
+            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+            <span>ゆみ</span>
+          </button>
+          <button onclick="setCurrentUser('nami')" id="user-btn-nami" class="user-switch-btn px-2.5 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 text-slate-600 hover:text-slate-900">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>なみ</span>
+          </button>
+        </div>
+
+        <!-- Emergency Alert Button -->
+        <button onclick="triggerEmergencyModal()" class="bg-rose-500 hover:bg-rose-600 text-white p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center space-x-1 animate-pulse" title="緊急SOS">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span class="hidden sm:inline">SOS</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="bg-white border-b border-slate-200 sticky top-16 z-20 shadow-xs">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+      <div class="flex justify-between sm:justify-start space-x-1 sm:space-x-8 overflow-x-auto no-scrollbar">
+        <button onclick="switchTab('calendar')" id="tab-calendar" class="tab-btn whitespace-nowrap px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-rose-500 text-rose-600 flex items-center space-x-2 transition-colors">
+          <i class="fa-regular fa-calendar-days text-base"></i>
+          <span>カレンダー</span>
+        </button>
+        <button onclick="switchTab('dinner')" id="tab-dinner" class="tab-btn whitespace-nowrap px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-2 transition-colors">
+          <i class="fa-solid fa-utensils text-base"></i>
+          <span>今日のごはん</span>
+        </button>
+        <button onclick="switchTab('shopping')" id="tab-shopping" class="tab-btn whitespace-nowrap px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-2 transition-colors">
+          <i class="fa-solid fa-cart-shopping text-base"></i>
+          <span>欲しいもの・買い物</span>
+        </button>
+        <button onclick="switchTab('album')" id="tab-album" class="tab-btn whitespace-nowrap px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-2 transition-colors">
+          <i class="fa-regular fa-images text-base"></i>
+          <span>思い出アルバム</span>
+        </button>
+        <button onclick="switchTab('location')" id="tab-location" class="tab-btn whitespace-nowrap px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-2 transition-colors">
+          <i class="fa-solid fa-location-dot text-base"></i>
+          <span>見守りマップ</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+
+    <!-- ================= CALENDAR VIEW ================= -->
+    <section id="view-calendar" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Calendar Main Panel -->
+        <div class="lg:col-span-2 bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+            <div class="flex items-center space-x-3">
+              <h2 class="text-xl font-bold text-slate-800" id="calendar-month-year">2026年 10月</h2>
+              <div class="flex space-x-1">
+                <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition"><i class="fa-solid fa-chevron-left"></i></button>
+                <button onclick="resetToCurrentMonth()" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">今月</button>
+                <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+
+            <!-- Member Color Legend -->
+            <div class="flex items-center space-x-2 text-[11px] font-medium flex-wrap">
+              <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-pink-500 mr-1"></span>ママ</span>
+              <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1"></span>れい</span>
+              <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 mr-1"></span>ゆみ</span>
+              <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></span>なみ</span>
+              <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></span>全員</span>
+            </div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div class="grid grid-cols-7 gap-1 text-center font-semibold text-xs text-slate-400 mb-2">
+            <div class="text-rose-500">日</div>
+            <div>月</div>
+            <div>火</div>
+            <div>水</div>
+            <div>木</div>
+            <div>金</div>
+            <div class="text-sky-500">土</div>
+          </div>
+
+          <div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2">
+            <!-- Dynamically Rendered Days -->
+          </div>
+        </div>
+
+        <!-- Selected Date Schedule & Memo -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-slate-800 text-base flex items-center space-x-2">
+                <i class="fa-regular fa-clock text-rose-500"></i>
+                <span id="selected-date-title">10月26日の予定</span>
+              </h3>
+              <button onclick="openAddEventModal()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg font-semibold transition">
+                + 予定追加
+              </button>
+            </div>
+
+            <div id="events-list" class="space-y-3 custom-scrollbar max-h-[300px] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Quick Board Sticky Note -->
+          <div class="bg-gradient-to-br from-pink-500/10 via-rose-500/5 to-transparent p-5 rounded-2xl border border-pink-200/60 relative">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-pink-700 flex items-center space-x-1">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>家族の連絡メモ</span>
+              </span>
+              <span class="text-[10px] text-pink-600" id="sticky-note-time">今日 08:30</span>
+            </div>
+            <p id="sticky-note-content" class="text-slate-700 text-sm font-medium leading-relaxed">
+              「今日はお姉ちゃん（れい）が19時半頃に帰ってきます！夕飯一緒にとりましょう〜」
+            </p>
+            <button onclick="editStickyNote()" class="mt-3 text-xs text-pink-700 hover:text-pink-900 font-semibold flex items-center space-x-1">
+              <i class="fa-solid fa-pen text-[10px]"></i>
+              <span>メモを更新する</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= DINNER / FOOD REQUEST VIEW ================= -->
+    <section id="view-dinner" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800 flex items-center space-x-2">
+              <i class="fa-solid fa-utensils text-amber-500"></i>
+              <span>今日のごはんリクエスト</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">「今日何食べたい？」をみんなでリクエスト＆決定しよう！</p>
+          </div>
+          <form onsubmit="addDinnerRequest(event)" class="flex space-x-2">
+            <input type="text" id="dinner-input" placeholder="食べたいものをリクエスト (例: オムライス)" class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400">
+            <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm">追加</button>
+          </form>
+        </div>
+
+        <div id="dinner-requests-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-6">
+          <!-- Dinner request cards dynamic rendering -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= SHOPPING & WISH LIST VIEW ================= -->
+    <section id="view-shopping" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Shopping List -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col h-[500px]">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+            <div class="flex items-center space-x-2">
+              <div class="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                <i class="fa-solid fa-cart-shopping"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-slate-800">お買い物リスト</h2>
+                <p class="text-xs text-slate-400">日用品や食材の買い出しメモ</p>
+              </div>
+            </div>
+            <span id="shopping-count" class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2.5 py-1 rounded-full">0件</span>
+          </div>
+
+          <form onsubmit="addShoppingItem(event)" class="flex space-x-2 mb-4">
+            <input type="text" id="shopping-input" placeholder="買ってくるもの (例: シャンプーの詰替え)" class="flex-1 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-emerald-500">
+            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition">追加</button>
+          </form>
+
+          <div id="shopping-list" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-1">
+            <!-- Dynamically Loaded -->
+          </div>
+        </div>
+
+        <!-- Wish List (Personal requests) -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col h-[500px]">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+            <div class="flex items-center space-x-2">
+              <div class="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+                <i class="fa-solid fa-gift"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-slate-800">みんなの欲しいものリスト</h2>
+                <p class="text-xs text-slate-400">誕生日・イベントで買ってほしいもの</p>
+              </div>
+            </div>
+            <span id="wish-count" class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-full">0件</span>
+          </div>
+
+          <form onsubmit="addWishItem(event)" class="flex space-x-2 mb-4">
+            <input type="text" id="wish-input" placeholder="欲しいものを追加" class="flex-1 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-indigo-500">
+            <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition">追加</button>
+          </form>
+
+          <div id="wish-list" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-1">
+            <!-- Dynamically Loaded -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= ALBUM VIEW ================= -->
+    <section id="view-album" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800 flex items-center space-x-2">
+              <i class="fa-solid fa-camera-retro text-purple-500"></i>
+              <span>家族のアルバム</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">みんなの思い出の写真をシェアしよう！</p>
+          </div>
+          <label class="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition shadow-md shadow-purple-200 flex items-center space-x-2 self-start sm:self-auto">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>写真を投稿する</span>
+            <input type="file" id="photo-file-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+          </label>
+        </div>
+
+        <div id="album-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-6">
+          <!-- Dynamically Loaded Images -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= LOCATION / WATCH VIEW ================= -->
+    <section id="view-location" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Family Member Status List -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 class="font-bold text-slate-800 flex items-center space-x-2">
+              <i class="fa-solid fa-shield-halved text-sky-500"></i>
+              <span>みんなの現在地</span>
+            </h2>
+            <span class="text-xs bg-sky-50 text-sky-600 px-2 py-1 rounded-full font-semibold">リアルタイム</span>
+          </div>
+
+          <div id="members-status-list" class="space-y-3">
+            <!-- Dynamically Loaded Status Cards -->
+          </div>
+        </div>
+
+        <!-- Simulated Map Panel -->
+        <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-800 relative min-h-[420px] flex flex-col justify-between overflow-hidden">
+          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          
+          <div class="relative z-10 flex justify-between items-start">
+            <div class="bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-xs text-slate-200 font-medium">
+              <i class="fa-solid fa-location-crosshairs text-sky-400 mr-1.5"></i>東京都周辺
+            </div>
+            <button onclick="refreshLocations()" class="bg-slate-800/90 hover:bg-slate-700 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-xs text-slate-200 font-medium transition flex items-center space-x-1">
+              <i class="fa-solid fa-rotate-right text-xs"></i>
+              <span>更新</span>
+            </button>
+          </div>
+
+          <!-- Pins Container -->
+          <div class="relative w-full h-64 my-auto">
+            <!-- Home Pin -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+              <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center animate-ping absolute"></div>
+              <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg relative z-10">
+                <i class="fa-solid fa-house text-sm"></i>
+              </div>
+              <span class="bg-slate-800/90 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold border border-slate-700 mt-1 shadow">自宅</span>
+            </div>
+
+            <!-- Mom Pin -->
+            <div class="absolute top-1/4 left-1/3 flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-pink-500 text-white border-2 border-white flex items-center justify-center font-bold text-xs shadow-lg">ママ</div>
+              <span class="bg-slate-800/90 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-medium border border-slate-700 mt-1">職場</span>
+            </div>
+
+            <!-- Rei Pin -->
+            <div class="absolute top-1/3 right-1/4 flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-purple-500 text-white border-2 border-white flex items-center justify-center font-bold text-xs shadow-lg">れい</div>
+              <span class="bg-slate-800/90 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-medium border border-slate-700 mt-1">大学キャンパス</span>
+            </div>
+
+            <!-- Yumi Pin -->
+            <div class="absolute bottom-1/4 left-1/4 flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-sky-500 text-white border-2 border-white flex items-center justify-center font-bold text-xs shadow-lg">ゆみ</div>
+              <span class="bg-slate-800/90 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-medium border border-slate-700 mt-1">高校</span>
+            </div>
+
+            <!-- Nami Pin -->
+            <div class="absolute bottom-1/3 right-1/3 flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-amber-500 text-white border-2 border-white flex items-center justify-center font-bold text-xs shadow-lg">なみ</div>
+              <span class="bg-slate-800/90 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-medium border border-slate-700 mt-1">習い事（ダンス）</span>
+            </div>
+          </div>
+
+          <div class="relative z-10 bg-slate-800/90 backdrop-blur-md p-3 rounded-xl border border-slate-700 text-xs text-slate-300 flex items-center justify-between">
+            <span class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>全員の安全を確認済み</span>
+            </span>
+            <span class="text-[10px] text-slate-500">最終位置更新: たった今</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- Modal: Add Event -->
+  <div id="modal-add-event" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <h3 class="font-bold text-slate-800 text-lg">新しい予定の追加</h3>
+        <button onclick="closeAddEventModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <form onsubmit="saveNewEvent(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">予定のタイトル</label>
+          <input type="text" id="event-title-input" required placeholder="例: 部活大会・習い事" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-rose-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">日付</label>
+            <input type="date" id="event-date-input" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">時間</label>
+            <input type="time" id="event-time-input" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">繰り返し設定</label>
+          <select id="event-repeat-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800">
+            <option value="none">なし（1回のみ）</option>
+            <option value="daily">毎日</option>
+            <option value="weekly">毎週（同じ曜日）</option>
+            <option value="monthly">毎月（同じ日付）</option>
+            <option value="yearly">毎年（誕生日・記念日など）</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">対象メンバー</label>
+          <select id="event-member-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800">
+            <option value="family">家族全員</option>
+            <option value="mom">ママ</option>
+            <option value="rei">れい</option>
+            <option value="yumi">ゆみ</option>
+            <option value="nami">なみ</option>
+          </select>
+        </div>
+
+        <div class="pt-4 flex space-x-3">
+          <button type="button" onclick="closeAddEventModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl font-semibold text-sm">キャンセル</button>
+          <button type="submit" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl font-semibold text-sm shadow-md shadow-rose-200">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Modal: Emergency SOS -->
+  <div id="modal-sos" class="fixed inset-0 bg-rose-900/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4">
+      <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+        <i class="fa-solid fa-bell animate-bounce"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900">緊急SOSを送信</h3>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        現在地と「助けて！」メッセージを、ママ・れい・ゆみ・なみ全員に一斉通知します。
+      </p>
+      <div class="pt-2 space-y-2">
+        <button onclick="sendSOS()" class="w-full bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg shadow-rose-300 transition">
+          SOS通知を送信する
+        </button>
+        <button onclick="closeSOSModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-2xl font-semibold text-xs">
+          キャンセル
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JavaScript Logic -->
+  <script>
+    // --- Application State ---
+    let currentUser = 'mom'; 
+    let currentTab = 'calendar';
+    let currentYear = 2026;
+    let currentMonth = 9; // 0-indexed (9 = October)
+    let selectedDateStr = '2026-10-26';
+
+    // Family Member Configurations
+    const usersConfig = {
+      mom: { name: 'ママ', color: 'bg-pink-500', textColor: 'text-pink-600' },
+      rei: { name: 'れい', color: 'bg-purple-500', textColor: 'text-purple-600' },
+      yumi: { name: 'ゆみ', color: 'bg-sky-500', textColor: 'text-sky-600' },
+      nami: { name: 'なみ', color: 'bg-amber-500', textColor: 'text-amber-600' },
+      family: { name: '全員', color: 'bg-emerald-500', textColor: 'text-emerald-600' }
+    };
+
+    // Events Data with Repeat rules
+    let eventsData = [
+      { id: 1, title: 'スーパー買い物', date: '2026-10-26', time: '17:00', member: 'mom', repeat: 'none' },
+      { id: 2, title: '大学ゼミ発表', date: '2026-10-26', time: '14:00', member: 'rei', repeat: 'none' },
+      { id: 3, title: 'ダンスレッスン', date: '2026-10-26', time: '18:30', member: 'nami', repeat: 'weekly' },
+      { id: 4, title: '中間テスト期間', date: '2026-10-28', time: '09:00', member: 'yumi', repeat: 'none' },
+      { id: 5, title: 'みんなで外食', date: '2026-10-31', time: '19:00', member: 'family', repeat: 'none' },
+      { id: 6, title: 'なみの誕生日🎉', date: '2026-11-05', time: '00:00', member: 'family', repeat: 'yearly' }
+    ];
+
+    // Dinner Requests Data
+    let dinnerRequests = [
+      { id: 1, title: 'ハンバーグ', votes: ['mom', 'nami'], requestedBy: 'なみ' },
+      { id: 2, title: '海鮮パスタ', votes: ['rei'], requestedBy: 'れい' },
+      { id: 3, title: 'オムライス', votes: ['yumi', 'mom', 'nami'], requestedBy: 'ゆみ' }
+    ];
+
+    // Shopping List Data
+    let shoppingItems = [
+      { id: 1, text: '牛乳 2本', completed: false, addedBy: 'ママ' },
+      { id: 2, text: '卵 1パック', completed: true, addedBy: 'ママ' },
+      { id: 3, text: 'ノート（B5）', completed: false, addedBy: 'ゆみ' }
+    ];
+
+    // Wish List Data
+    let wishItems = [
+      { id: 1, text: '新しいダンスシューズ', requestedBy: 'なみ' },
+      { id: 2, text: '参考書（英語）', requestedBy: 'ゆみ' },
+      { id: 3, text: 'ワイヤレスイヤホン', requestedBy: 'れい' }
+    ];
+
+    // Album Photos
+    let albumPhotos = [
+      { id: 1, url: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80', caption: '家族でピクニックに行ったよ！', author: 'ママ', date: '2026/10/12' },
+      { id: 2, url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80', caption: 'なみのダンス発表会✨', author: 'れい', date: '2026/09/28' },
+      { id: 3, url: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=600&q=80', caption: 'カフェで勉強中☕️', author: 'ゆみ', date: '2026/09/15' }
+    ];
+
+    // Family Members Location & Status
+    let membersStatus = [
+      { name: 'ママ', location: 'オフィス（新宿）', status: '勤務中', battery: 82, updated: '5分前', color: 'bg-pink-500' },
+      { name: 'れい', location: '大学（渋谷）', status: '授業中', battery: 65, updated: '12分前', color: 'bg-purple-500' },
+      { name: 'ゆみ', location: '高校（原宿）', status: '部活中', battery: 45, updated: '2分前', color: 'bg-sky-500' },
+      { name: 'なみ', location: 'ダンススタジオ', status: 'レッスン中', battery: 90, updated: '1分前', color: 'bg-amber-500' }
+    ];
+
+    // Navigation and Tab Switching
+    function switchTab(tabId) {
+      currentTab = tabId;
+      const views = ['calendar', 'dinner', 'shopping', 'album', 'location'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        const btn = document.getElementById(`tab-${v}`);
+        if (v === tabId) {
+          el.classList.remove('hidden');
+          btn.classList.add('border-rose-500', 'text-rose-600');
+          btn.classList.remove('border-transparent', 'text-slate-500');
+        } else {
+          el.classList.add('hidden');
+          btn.classList.remove('border-rose-500', 'text-rose-600');
+          btn.classList.add('border-transparent', 'text-slate-500');
+        }
+      });
+
+      if (tabId === 'dinner') renderDinnerRequests();
+      if (tabId === 'shopping') { renderShoppingList(); renderWishList(); }
+      if (tabId === 'album') renderAlbumGrid();
+      if (tabId === 'location') renderMembersStatus();
+    }
+
+    // User Switcher
+    function setCurrentUser(userKey) {
+      currentUser = userKey;
+      Object.keys(usersConfig).forEach(k => {
+        if (k === 'family') return;
+        const btn = document.getElementById(`user-btn-${k}`);
+        if (!btn) return;
+        if (k === userKey) {
+          btn.className = 'user-switch-btn px-2.5 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 bg-white shadow-xs text-slate-800';
+        } else {
+          btn.className = 'user-switch-btn px-2.5 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 text-slate-600 hover:text-slate-900';
+        }
+      });
+      if (currentTab === 'dinner') renderDinnerRequests();
+    }
+
+    // Date Logic & Repeat Evaluation
+    function isEventOnDate(evt, targetDateStr) {
+      if (evt.date === targetDateStr) return true;
+      if (!evt.repeat || evt.repeat === 'none') return false;
+
+      const evtDate = new Date(evt.date + 'T00:00:00');
+      const targetDate = new Date(targetDateStr + 'T00:00:00');
+
+      if (targetDate < evtDate) return false;
+
+      if (evt.repeat === 'daily') {
+        return true;
+      } else if (evt.repeat === 'weekly') {
+        return evtDate.getDay() === targetDate.getDay();
+      } else if (evt.repeat === 'monthly') {
+        return evtDate.getDate() === targetDate.getDate();
+      } else if (evt.repeat === 'yearly') {
+        return evtDate.getMonth() === targetDate.getMonth() && evtDate.getDate() === targetDate.getDate();
+      }
+      return false;
+    }
+
+    // --- Calendar Module ---
+    function renderCalendar() {
+      const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+      document.getElementById('calendar-month-year').innerText = `${currentYear}年 ${monthNames[currentMonth]}`;
+
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'h-16 sm:h-20 bg-slate-50/50 rounded-xl border border-dashed border-slate-100';
+        grid.appendChild(emptyCell);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isSelected = dateString === selectedDateStr;
+        const dayEvents = eventsData.filter(e => isEventOnDate(e, dateString));
+
+        const dayCell = document.createElement('div');
+        dayCell.onclick = () => selectDate(dateString);
+        dayCell.className = `h-16 sm:h-20 p-1.5 rounded-xl border transition cursor-pointer flex flex-col justify-between ${
+          isSelected ? 'bg-rose-50/80 border-rose-400 ring-2 ring-rose-200' : 'bg-white border-slate-100 hover:border-slate-300'
+        }`;
+
+        const dateNum = document.createElement('span');
+        dateNum.className = `text-xs font-bold leading-none ${isSelected ? 'text-rose-600' : 'text-slate-700'}`;
+        dateNum.innerText = day;
+        dayCell.appendChild(dateNum);
+
+        const eventDotContainer = document.createElement('div');
+        eventDotContainer.className = 'space-y-1 overflow-hidden';
+
+        dayEvents.slice(0, 2).forEach(evt => {
+          const badge = document.createElement('div');
+          const cfg = usersConfig[evt.member] || usersConfig.family;
+          const repeatIcon = evt.repeat && evt.repeat !== 'none' ? ' 🔄' : '';
+          badge.className = `text-[9px] px-1 py-0.5 rounded truncate font-medium ${cfg.color} text-white`;
+          badge.innerText = evt.title + repeatIcon;
+          eventDotContainer.appendChild(badge);
+        });
+
+        if (dayEvents.length > 2) {
+          const more = document.createElement('div');
+          more.className = 'text-[9px] text-slate-400 font-bold leading-none pl-0.5';
+          more.innerText = `+${dayEvents.length - 2}`;
+          eventDotContainer.appendChild(more);
+        }
+
+        dayCell.appendChild(eventDotContainer);
+        grid.appendChild(dayCell);
+      }
+    }
+
+    function selectDate(dateStr) {
+      selectedDateStr = dateStr;
+      const dateObj = new Date(dateStr + 'T00:00:00');
+      document.getElementById('selected-date-title').innerText = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日の予定`;
+      renderCalendar();
+      renderEventsList();
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    function resetToCurrentMonth() {
+      const now = new Date();
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+      selectedDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      selectDate(selectedDateStr);
+    }
+
+    function renderEventsList() {
+      const container = document.getElementById('events-list');
+      container.innerHTML = '';
+      const dayEvents = eventsData.filter(e => isEventOnDate(e, selectedDateStr));
+
+      if (dayEvents.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">予定はありません</div>`;
+        return;
+      }
+
+      const repeatLabels = { daily: '毎日', weekly: '毎週', monthly: '毎月', yearly: '毎年' };
+
+      dayEvents.forEach(evt => {
+        const cfg = usersConfig[evt.member] || usersConfig.family;
+        const repeatBadge = evt.repeat && evt.repeat !== 'none' 
+          ? `<span class="bg-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-full font-semibold ml-2"><i class="fa-solid fa-rotate-right text-[9px] mr-0.5"></i>${repeatLabels[evt.repeat]}</span>` 
+          : '';
+
+        const card = document.createElement('div');
+        card.className = 'p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between';
+        card.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-2 h-8 rounded-full ${cfg.color}"></div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-800 flex items-center">${evt.title}${repeatBadge}</h4>
+              <div class="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
+                <span><i class="fa-regular fa-clock mr-1"></i>${evt.time}</span>
+                <span>•</span>
+                <span class="${cfg.textColor} font-semibold">${cfg.name}</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="deleteEvent(${evt.id})" class="text-slate-300 hover:text-rose-500 transition px-2">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openAddEventModal() {
+      document.getElementById('event-date-input').value = selectedDateStr;
+      document.getElementById('modal-add-event').classList.remove('hidden');
+    }
+
+    function closeAddEventModal() {
+      document.getElementById('modal-add-event').classList.add('hidden');
+    }
+
+    function saveNewEvent(e) {
+      e.preventDefault();
+      eventsData.push({
+        id: Date.now(),
+        title: document.getElementById('event-title-input').value,
+        date: document.getElementById('event-date-input').value,
+        time: document.getElementById('event-time-input').value,
+        repeat: document.getElementById('event-repeat-input').value,
+        member: document.getElementById('event-member-input').value
+      });
+      closeAddEventModal();
+      document.getElementById('event-title-input').value = '';
+      selectDate(selectedDateStr);
+    }
+
+    function deleteEvent(id) {
+      eventsData = eventsData.filter(e => e.id !== id);
+      renderEventsList();
+      renderCalendar();
+    }
+
+    function editStickyNote() {
+      const current = document.getElementById('sticky-note-content').innerText.replace(/^「|」$/g, '');
+      const newText = prompt('伝言板のメッセージを入力してください:', current);
+      if (newText && newText.trim()) {
+        document.getElementById('sticky-note-content').innerText = `「${newText.trim()}」`;
+      }
+    }
+
+    // --- Dinner Request Module ---
+    function renderDinnerRequests() {
+      const container = document.getElementById('dinner-requests-grid');
+      container.innerHTML = '';
+
+      dinnerRequests.forEach(req => {
+        const hasVoted = req.votes.includes(currentUser);
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:border-amber-300 transition';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">発案: ${req.requestedBy}</span>
+              <span class="text-xs font-bold text-amber-600 flex items-center space-x-1">
+                <i class="fa-solid fa-heart"></i>
+                <span>${req.votes.length}票</span>
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 mb-2">${req.title}</h3>
+          </div>
+          <div class="pt-3 border-t border-slate-200/60 flex justify-between items-center">
+            <button onclick="toggleDinnerVote(${req.id})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+              hasVoted ? 'bg-amber-500 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-amber-50'
+            }">
+              ${hasVoted ? '👍 投票済み' : '食べたい！'}
+            </button>
+            <button onclick="deleteDinnerRequest(${req.id})" class="text-slate-300 hover:text-rose-500 text-xs">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function addDinnerRequest(e) {
+      e.preventDefault();
+      const input = document.getElementById('dinner-input');
+      if (!input.value.trim()) return;
+      dinnerRequests.unshift({
+        id: Date.now(),
+        title: input.value.trim(),
+        votes: [currentUser],
+        requestedBy: usersConfig[currentUser].name
+      });
+      input.value = '';
+      renderDinnerRequests();
+    }
+
+    function toggleDinnerVote(id) {
+      dinnerRequests = dinnerRequests.map(req => {
+        if (req.id === id) {
+          const voted = req.votes.includes(currentUser);
+          return {
+            ...req,
+            votes: voted ? req.votes.filter(u => u !== currentUser) : [...req.votes, currentUser]
+          };
+        }
+        return req;
+      });
+      renderDinnerRequests();
+    }
+
+    function deleteDinnerRequest(id) {
+      dinnerRequests = dinnerRequests.filter(r => r.id !== id);
+      renderDinnerRequests();
+    }
+
+    // --- Shopping Module ---
+    function renderShoppingList() {
+      const container = document.getElementById('shopping-list');
+      container.innerHTML = '';
+      document.getElementById('shopping-count').innerText = `${shoppingItems.filter(i => !i.completed).length}件`;
+
+      shoppingItems.forEach(item => {
+        const row = document.createElement('div');
+        row.className = `p-3 rounded-xl border flex items-center justify-between ${
+          item.completed ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200'
+        }`;
+        row.innerHTML = `
+          <div class="flex items-center space-x-3 cursor-pointer flex-1" onclick="toggleShoppingItem(${item.id})">
+            <input type="checkbox" ${item.completed ? 'checked' : ''} class="w-4 h-4 text-emerald-500 rounded">
+            <div>
+              <span class="text-xs sm:text-sm font-semibold ${item.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${item.text}</span>
+              <span class="text-[10px] text-slate-400 block">追加: ${item.addedBy}</span>
+            </div>
+          </div>
+          <button onclick="deleteShoppingItem(${item.id})" class="text-slate-300 hover:text-rose-500 px-2"><i class="fa-solid fa-xmark"></i></button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addShoppingItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('shopping-input');
+      if (!input.value.trim()) return;
+      shoppingItems.unshift({ id: Date.now(), text: input.value.trim(), completed: false, addedBy: usersConfig[currentUser].name });
+      input.value = '';
+      renderShoppingList();
+    }
+
+    function toggleShoppingItem(id) {
+      shoppingItems = shoppingItems.map(i => i.id === id ? { ...i, completed: !i.completed } : i);
+      renderShoppingList();
+    }
+
+    function deleteShoppingItem(id) {
+      shoppingItems = shoppingItems.filter(i => i.id !== id);
+      renderShoppingList();
+    }
+
+    // --- Wish List Module ---
+    function renderWishList() {
+      const container = document.getElementById('wish-list');
+      container.innerHTML = '';
+      document.getElementById('wish-count').innerText = `${wishItems.length}件`;
+
+      wishItems.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between';
+        row.innerHTML = `
+          <div>
+            <span class="text-xs sm:text-sm font-semibold text-slate-800 block">${item.text}</span>
+            <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full inline-block mt-0.5">${item.requestedBy} の欲しいもの</span>
+          </div>
+          <button onclick="deleteWishItem(${item.id})" class="text-slate-300 hover:text-rose-500 px-2"><i class="fa-solid fa-xmark"></i></button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addWishItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('wish-input');
+      if (!input.value.trim()) return;
+      wishItems.unshift({ id: Date.now(), text: input.value.trim(), requestedBy: usersConfig[currentUser].name });
+      input.value = '';
+      renderWishList();
+    }
+
+    function deleteWishItem(id) {
+      wishItems = wishItems.filter(i => i.id !== id);
+      renderWishList();
+    }
+
+    // --- Album Module ---
+    function renderAlbumGrid() {
+      const container = document.getElementById('album-grid');
+      container.innerHTML = '';
+      albumPhotos.forEach(photo => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl overflow-hidden border border-slate-200 shadow-2xs hover:shadow-md transition';
+        card.innerHTML = `
+          <div class="h-44 overflow-hidden bg-slate-100">
+            <img src="${photo.url}" class="w-full h-full object-cover">
+          </div>
+          <div class="p-3">
+            <p class="text-xs font-semibold text-slate-800">${photo.caption}</p>
+            <div class="flex justify-between items-center text-[10px] text-slate-400 mt-2">
+              <span>投稿: ${photo.author}</span>
+              <span>${photo.date}</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function handlePhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const caption = prompt('写真のキャプションを入力してください:', '家族の思い出');
+      if (caption === null) return;
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        albumPhotos.unshift({
+          id: Date.now(),
+          url: evt.target.result,
+          caption: caption.trim() || '思い出の一枚',
+          author: usersConfig[currentUser].name,
+          date: new Date().toLocaleDateString('ja-JP')
+        });
+        renderAlbumGrid();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // --- Status & Location Module ---
+    function renderMembersStatus() {
+      const container = document.getElementById('members-status-list');
+      container.innerHTML = '';
+      membersStatus.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between';
+        card.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-full ${m.color} text-white font-bold flex items-center justify-center text-xs shadow-xs">
+              ${m.name[0]}
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800">${m.name}</span>
+              <p class="text-xs text-slate-600 font-medium mt-0.5"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>${m.location}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 block">${m.status}</span>
+            <span class="text-[10px] text-slate-400 block mt-1"><i class="fa-solid fa-battery-three-quarters mr-1"></i>${m.battery}% • ${m.updated}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function refreshLocations() {
+      membersStatus.forEach(m => m.updated = 'たった今');
+      renderMembersStatus();
+    }
+
+    // --- Emergency SOS Modal ---
+    function triggerEmergencyModal() { document.getElementById('modal-sos').classList.remove('hidden'); }
+    function closeSOSModal() { document.getElementById('modal-sos').classList.add('hidden'); }
+    function sendSOS() {
+      closeSOSModal();
+      alert(`【緊急SOS通知】\n${usersConfig[currentUser].name} から緊急メッセージと現在地を家族全員に一斉送信しました！`);
+    }
+
+    // --- Initial Load ---
+    window.onload = function() {
+      renderCalendar();
+      renderEventsList();
+    };
+  </script>
+</body>
+</html>
